@@ -29,7 +29,13 @@ function parseStudents(text) {
 function applyData(students, courses) {
   studText = (students || window.DEFAULT_STUDENTS).trim();
   STUD = parseStudents(studText);
-  COURSES = courses || window.DEFAULT_COURSES;
+  /* Saved (admin/Firebase) course data can be older than js/courses.js.
+     The "routine" (day + teachers) is always taken from js/courses.js so that
+     edits made in the file are never hidden by an old saved copy. */
+  COURSES = (courses || window.DEFAULT_COURSES).map(c => {
+    const d = window.DEFAULT_COURSES.find(x => x.id === c.id);
+    return d && d.routine ? Object.assign({}, c, { routine: d.routine }) : c;
+  });
   const cur = $("course").value;
   $("course").innerHTML = COURSES.map((c, i) => `<option value="${i}">${c.name} (${c.code})</option>`).join("");
   if (cur && COURSES[+cur]) $("course").value = cur;
