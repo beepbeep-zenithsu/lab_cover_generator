@@ -22,7 +22,8 @@
      routine          : (optional) day of week (0=Sun ... 6=Sat) + teachers,
                         by department code and section, used to auto-fill
                         "Date of Performance" and "Submitted To".
-                        "*" means every section.
+                        Department codes: "11" = ME, "12" = IPE.
+                        Sections: A, B  (or "*" = every section).
    ===================================================================== */
 
 /* Text positions shared by the three "full" covers (MoM, Material, Thermo). */
@@ -72,7 +73,12 @@ window.DEFAULT_COURSES = [
       "Study of crystal structures using ball models",
       "Tensile Test of a metal specimen"
     ],
-    routine: {}
+    routine: {
+      "11": {
+        A: { day: 5, t: "Dr. Md. Saiful Islam (Sir) & Dr. Md. Abu Shaid Sujon (Sir)" },
+        B: { day: 5, t: "Dr. Md. Saiful Islam (Sir) & Mr. Md. Hasibur Rahman Hamim (Sir)" }
+      }
+    }
   },
 
   {
@@ -86,7 +92,12 @@ window.DEFAULT_COURSES = [
       "Study of a petrol engine",
       "Study of a diesel engine"
     ],
-    routine: {}
+    routine: {
+      "11": {
+        A: { day: 4, t: "Mr. Sifat Abdul Bari (Sir) & Mr. Mahdi Hafiz Nabil (Sir)" },
+        B: { day: 4, t: "Mr. Sifat Abdul Bari (Sir) & Mr. Mahdi Hafiz Nabil (Sir)" }
+      }
+    }
   },
 
   {
@@ -111,6 +122,13 @@ window.DEFAULT_COURSES = [
       fluidPos(436.6, 466.7, 519.2, 549.5),   /* Experiment 5 */
       fluidPos(486.2, 516.4, 546.6, 576.8)    /* Experiment 6 */
     ],
-    routine: {}
+    /* The Fluid cover has no "Submitted To" line, so this is not printed on it;
+       kept here so the teacher / day info is not lost. */
+    routine: {
+      "11": {
+        A: { day: 2, t: "Dr. Muhammad Rizwanur Rahman (Sir) & Mr. Sefat Mahmud Siddique (Sir)" },
+        B: { day: 5, t: "Dr. Muhammad Rizwanur Rahman (Sir) & Mr. Sefat Mahmud Siddique (Sir)" }
+      }
+    }
   }
 ];
