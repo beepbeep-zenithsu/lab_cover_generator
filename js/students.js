@@ -118,4 +118,64 @@ window.DEFAULT_STUDENTS = `
 230011259 Humayra Shikder Mishty
 240011101 Jahin Arham Siddiquee
 240011201 Sadia Sreoshi
+230012101 Md. Saiduzzaman Tamim
+230012102 Mohtasin Fuad
+230012103 Atik Murshed
+230012104 Muhibul Islam
+230012105 Md. Nafidur Rahman Ahmed
+230012106 Samit Anjum
+230012108 Antara Raisa
+230012109 Mohaimen Mohian
+230012110 Jishan Nafis Alam
+230012111 Mahtab Hossain
+230012112 Tanvir Ahasan
+230012113 Md. Radowan Siraj
+230012114 Muhib Islam
+230012115 Fardeen Alam
+230012116 Farha Tasneem
+230012117 Anisa Islam
+230012119 Mustabi Hossain Fardu
+230012120 Md. Rifat Hasan
+230012121 Raisa Rodoshi
+230012122 Al Mahee Muktadeer
+230012123 Saleh Mushfiqur Rahman
+230012124 S.M. Tawfiqunnabi
+230012125 Abida Sultana
+230012126 Md. Abdul Muiz
+230012129 Taki Tajwoar Shrestha
+230012130 Sumaiya Afrin
+230012131 Adeeb Ibne Mahabub
+230012132 Dhrubo Hridraz
+230012133 SM Mobasshir Ismail
+230012134 Mohammad Saffan Hossain
+230012135 Mouhamadou Moubarak Hamatoukour
+230012136 Mubashshira Rahman
+230012137 Tasnim Ara Rahma
+230012138 Rifat Raihan
+230012139 Nooraisha Faizah Mihika
+230012140 Al Rakib Fakruddin
+230012141 Md. Atiar Rahman
+230012142 Rutaba Afnan
+230012143 Shafin Mahmud Sifat
+230012145 Tasin Ahmed
+230012146 Shagufta Afrin
+230012148 Ishrak Hossain
+230012149 Md. Sazzadul Islam Sujal
+230012150 Ahmed Taki Tajwar
+230012151 Nahin Feeda
+230012152 Fahima Shahreen Hoque
+230012153 Fariha Rahman
+230012154 Faiza Habib
+230012155 Md. Mahid Hasan Sisir
+230012156 Md. Ashfaq Rahman Bhuiyan
+230012157 Maisha Islamm Nafi
+230012158 Mashfique Haider Loy
+230012159 Tasin Muhammed Nibir
+230012160 Farhan Sadik Abdullah
+230012161 Anamul Haq Irfan
+230012162 Kazi Wasikur Rahman
+230012163 Zaedur Rahman Zarif
+230012164 Mahdi Sadat
+230012165 Addin Ahmed
+230012166 Md. Tajreian Hossain
 `;

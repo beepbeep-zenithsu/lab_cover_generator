@@ -1,21 +1,36 @@
 /* =====================================================================
    app.js  -  application logic (you normally don't need to edit this)
-   Data lives in:  js/config.js, js/students.js, js/courses.js
+   Data lives in:  js/config.js, js/students.js, js/courses.js (IUT)
+                   js/cuet.js (CUET)
+   Each university has its OWN page (index.html = IUT, cuet.html = CUET).
+   A page sets window.PAGE_UNI before this file loads; the other
+   university's data and interface are never loaded on that page.
    ===================================================================== */
 (function () {
 "use strict";
 
-const CFG = window.APP_CONFIG;
+const CFG = window.APP_CONFIG || {};          /* only loaded by the IUT page (index.html) */
 const $ = id => document.getElementById(id);
 const FB_DOC = ["labcover", "config"];           /* Firestore collection / doc */
 const LS_KEY = "lcg_local_v3";                   /* localStorage (no-Firebase mode) */
 
-let COURSES = window.DEFAULT_COURSES;
+const PAGE = window.PAGE_UNI || "iut";           /* "iut" or a key of window.MANUAL_UNIS (e.g. "cuet") */
+const DEF_COURSES = window.DEFAULT_COURSES || [];
+const DEF_STUDENTS = window.DEFAULT_STUDENTS || "";
+let COURSES = DEF_COURSES;
 let STUD = {};
 let P = null;                                    /* the currently selected student */
-let studText = window.DEFAULT_STUDENTS.trim();
+let studText = DEF_STUDENTS.trim();
 let db = null, auth = null;                      /* Firebase handles (if configured) */
 let isAdmin = false;
+
+/* ---------- IUT page (auto) / other-university page (manual) ---------- */
+const isManual = () => PAGE !== "iut";
+const MAN = () => (window.MANUAL_UNIS || {})[PAGE] || null;
+const manCache = {};
+const manStudents = u => manCache[u.name] || (manCache[u.name] = parseStudents(u.students.trim()));
+const activeCourses = () => isManual() ? MAN().courses : COURSES.filter(c => !c.depts || !P || c.depts.includes(P.dc));
+const idLen = () => isManual() ? MAN().idLength : 9;
 
 /* ---------- data loading ---------- */
 function parseStudents(text) {
@@ -27,19 +42,24 @@ function parseStudents(text) {
   return m;
 }
 function applyData(students, courses) {
-  studText = (students || window.DEFAULT_STUDENTS).trim();
+  studText = (students || DEF_STUDENTS).trim();
   STUD = parseStudents(studText);
   /* Saved (admin/Firebase) course data can be older than js/courses.js.
      The "routine" (day + teachers) is always taken from js/courses.js so that
      edits made in the file are never hidden by an old saved copy. */
-  COURSES = (courses || window.DEFAULT_COURSES).map(c => {
-    const d = window.DEFAULT_COURSES.find(x => x.id === c.id);
-    return d && d.routine ? Object.assign({}, c, { routine: d.routine }) : c;
+  COURSES = (courses || DEF_COURSES).map(c => {
+    const d = DEF_COURSES.find(x => x.id === c.id);
+    return d ? Object.assign({}, c, { routine: d.routine, depts: d.depts, overlay: d.overlay }) : c;
   });
-  const cur = $("course").value;
-  $("course").innerHTML = COURSES.map((c, i) => `<option value="${i}">${c.name} (${c.code})</option>`).join("");
-  if (cur && COURSES[+cur]) $("course").value = cur;
-  if ($("sid").value.length === 9) onId();
+  /* courses added to js/courses.js later must show up even if an older copy is saved online */
+  DEF_COURSES.forEach(d => { if (!COURSES.some(c => c.id === d.id)) COURSES.push(d); });
+  fillCourses();
+  if ($("sid").value.length === idLen()) onId();
+}
+function fillCourses() {
+  const cur = $("course").value, list = activeCourses();
+  $("course").innerHTML = list.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join("");
+  if (cur && list.some(c => c.id === cur)) $("course").value = cur;
 }
 function loadLocal() {
   try {
@@ -63,11 +83,20 @@ async function loadRemote() {
 const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const fmt = v => v ? new Date(v + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
 function lastDay(day) { const d = new Date(); while (d.getDay() !== day) d.setDate(d.getDate() - 1); return d; }
-const curCourse = () => COURSES[+$("course").value];
+const curCourse = () => { const l = activeCourses(); return l.find(c => c.id === $("course").value) || l[0]; };
 const curExp = () => +$("exp").value;
 
 /* ---------- Student ID -> details.  (Edit here to change ID rules.) ---------- */
+function parseManualId(id) {
+  const u = MAN();
+  if (!u || !new RegExp("^\\d{" + u.idLength + "}$").test(id)) return null;
+  const name = manStudents(u)[id];
+  if (!name) return null;
+  const roll = +id.slice(u.rollFrom);
+  return { id, name, uni: u.name, dept: u.dept, prog: u.prog || "", roll, sec: u.sectionFor ? u.sectionFor(roll) : "", grp: u.groupFor ? u.groupFor(roll) : "", manual: true };
+}
 function parseId(id) {
+  if (isManual()) return parseManualId(id);
   if (!/^\d{9}$/.test(id) || !STUD[id]) return null;
   const dc = id.slice(4, 6), s = id[6], roll = +id.slice(7);
   const d = CFG.DEPTS[dc];
@@ -86,20 +115,23 @@ function onId() {
   P = null;
   $("err").hidden = true; $("info").hidden = true; $("form").hidden = true; $("cv").hidden = true; $("ph").hidden = false;
   if (!v) return;
-  if (v.length < 9 && document.activeElement === $("sid")) return;
+  if (v.length < idLen() && document.activeElement === $("sid")) return;
   P = parseId(v);
   if (!P) {
     const body = encodeURIComponent("Student ID entered: " + v + "\n\nIssue (wrong ID / wrong name / wrong biodata / other):\n");
     $("err").hidden = false;
     $("err").innerHTML = `Invalid Student ID. Please enter a correct Student ID.
-      <div class="r"><a href="mailto:${CFG.CORRECTION_EMAIL}?subject=${encodeURIComponent("Student Information Correction Request")}&body=${body}">
+      <div class="r"><a href="mailto:${(isManual() && MAN().correctionEmail) || CFG.CORRECTION_EMAIL || ''}?subject=${encodeURIComponent("Student Information Correction Request")}&body=${body}">
       <button type="button">Request Information Correction</button></a></div>`;
     return;
   }
   $("info").hidden = false;
-  $("info").innerHTML = [["Name", P.name], ["Student ID", P.id], ["Department", P.dept], ["Programme", P.prog], ["Section / Group", `${P.sec} / ${P.grp}`]]
+  $("info").innerHTML = (P.manual
+      ? [["Name", P.name], ["Student ID", P.id], ["University", P.uni], ["Department", P.dept], ["Section / Group", `${P.sec} / ${P.grp}`]]
+      : [["Name", P.name], ["Student ID", P.id], ["Department", P.dept], ["Programme", P.prog], ["Section / Group", `${P.sec} / ${P.grp}`]])
     .map(a => `<div><b>${a[0]}</b>${a[1]}</div>`).join("");
   $("form").hidden = false;
+  fillCourses();                                  /* course list depends on the student's department */
   onCourse();
 }
 
@@ -113,13 +145,16 @@ function onCourse() {
 
 function buildExtraFields() {
   const c = curCourse(), box = $("extraFields");
+  if (c.fields === "cuet") { buildCuetFields(c, box); return; }
   if (c.fields !== "full") { box.innerHTML = ""; return; }
   const r = routineFor(c);
   box.innerHTML = `<details><summary>Optional: edit dates / submitted-to</summary>
     <div class="two"><div><label for="dp">Date of Performance</label><input type="date" id="dp"></div>
     <div><label for="ds">Date of Submission</label><input type="date" id="ds"></div></div>
     <label for="stf">Submitted To</label><input id="stf" placeholder="Teacher name(s)"></details>`;
-  if (r) $("dp").value = iso(lastDay(r.day));
+  /* No routine saved for this department/section/course -> start from today
+     (still editable) instead of leaving the dates empty. */
+  $("dp").value = iso(r ? lastDay(r.day) : new Date());
   setSubmission();
   $("stf").value = r ? r.t : "";
   $("dp").oninput = () => { setSubmission(); draw(); };
@@ -128,7 +163,24 @@ function buildExtraFields() {
 }
 function setSubmission() {
   const v = $("dp") && $("dp").value; if (!v) return;
-  const d = new Date(v + "T00:00:00"); d.setDate(d.getDate() + 14); $("ds").value = iso(d);
+  const d = new Date(v + "T00:00:00"); d.setDate(d.getDate() + (curCourse().submitDays || 14)); $("ds").value = iso(d);
+}
+
+/* Manual-mode (CUET-style) cover: dates + Level / Term / Section / Group */
+function buildCuetFields(c, box) {
+  box.innerHTML = `<details open><summary>Edit dates / level / term / section / group</summary>
+    <div class="two"><div><label for="dp">Date of Experiment</label><input type="date" id="dp"></div>
+    <div><label for="ds">Date of Submission</label><input type="date" id="ds"></div></div>
+    <div class="two"><div><label for="lv">Level</label><input id="lv"></div>
+    <div><label for="tm">Term</label><input id="tm"></div></div>
+    <div class="two"><div><label for="sc">Section</label><input id="sc"></div>
+    <div><label for="gr">Group</label><input id="gr" placeholder="e.g. A1"></div></div></details>`;
+  $("dp").value = iso(new Date());
+  setSubmission();
+  $("lv").value = c.level || ""; $("tm").value = c.term || "";
+  $("sc").value = P.sec || ""; $("gr").value = P.grp || "";
+  $("dp").oninput = () => { setSubmission(); draw(); };
+  ["ds", "lv", "tm", "sc", "gr"].forEach(id => $(id).oninput = draw);
 }
 
 function buildButtons() {
@@ -159,14 +211,20 @@ async function draw() {
   try { img = await loadImg(src); }
   catch (err) { $("ph").hidden = false; $("ph").textContent = "Could not load the cover template image: " + src; cv.hidden = true; return; }
   const font = c.font || "Ubuntu,Arial,sans-serif";
-  try { await document.fonts.load("500 16px Ubuntu"); } catch (err) {}
+  try { await document.fonts.load("500 16px Ubuntu"); await document.fonts.load("700 16px Ubuntu"); } catch (err) {}
   if (curExp() !== e || curCourse() !== c) return;   /* user changed selection meanwhile */
   cv.width = img.naturalWidth; cv.height = img.naturalHeight;
   const k = cv.width / c.pageW, p = c.posByExp ? c.posByExp[e] : c.pos;
   ctx.drawImage(img, 0, 0);
+  if (c.overlay) drawOverlay(c.overlay, c.code, c.name);
   ctx.fillStyle = "#1a1a1a"; ctx.textBaseline = "middle";
   let rows;
-  if (c.fields === "full") {
+  if (c.fields === "cuet") {
+    rows = [[p.no, c.code], [p.ct, c.title || c.name], [p.en, String(e + 1)], [p.dop, fmt($("dp").value)], [p.dos, fmt($("ds").value)],
+            [p.nm, P.name], [p.roll, P.id], [p.lv, $("lv").value.trim()], [p.tm, $("tm").value.trim()],
+            [p.sc, $("sc").value.trim()], [p.gp, $("gr").value.trim()]];
+    drawTitleBox(c, e, font, k);
+  } else if (c.fields === "full") {
     rows = [[p.en, String(e + 1)], [p.t, c.exps[e]], [p.dop, fmt($("dp").value)], [p.dos, fmt($("ds").value)],
             [p.sub, $("stf").value], [p.nm, P.name], [p.sid, P.id], [p.dp, P.dept], [p.pr, P.prog], [p.gp, P.grp]];
   } else {
@@ -183,6 +241,50 @@ async function draw() {
   cv.hidden = false; $("ph").hidden = true;
 }
 
+/* Re-print the course code (in the coloured pill) and the course name on a
+   borrowed cover: paint over the old text, then draw the new one centred. */
+function drawOverlay(o, code, name) {
+  const s = cv.width / o.w;
+  const put = (spec, text) => {
+    const [x1, y1, x2, y2] = spec.box;
+    ctx.fillStyle = spec.color; ctx.fillRect(x1 * s, y1 * s, (x2 - x1) * s, (y2 - y1) * s);
+    let px = spec.size * s; const maxW = (spec.maxW || (x2 - x1)) * s;
+    const setF = () => ctx.font = `700 ${px}px Ubuntu,Arial,sans-serif`;
+    setF();
+    while (ctx.measureText(text).width > maxW && px > 10 * s) { px -= s; setF(); }
+    ctx.fillStyle = spec.text; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(text, spec.cx * s, spec.cy * s);
+    ctx.textAlign = "left";
+  };
+  put(o.pill, code);
+  put(o.title, name);
+}
+
+/* Experiment title, centred and wrapped inside a box (CUET-style cover). */
+function drawTitleBox(c, e, font, k) {
+  if (!c.tbox) return;
+  const [x1, y1, x2, y2] = c.tbox, text = c.exps[e];
+  const maxW = (x2 - x1 - 24) * k, maxH = (y2 - y1 - 16) * k;
+  const wrap = () => {
+    const out = []; let line = "";
+    text.split(" ").forEach(w => {
+      const t = line ? line + " " + w : w;
+      if (line && ctx.measureText(t).width > maxW) { out.push(line); line = w; } else line = t;
+    });
+    return out.concat(line);
+  };
+  let s = (c.tboxSize || 28) * k, lines;
+  for (;;) {
+    ctx.font = `500 ${s}px ${font}`; lines = wrap();
+    if (lines.length * s * 1.25 <= maxH || s <= 10 * k) break;
+    s -= k;
+  }
+  const lh = s * 1.25, cy = (y1 + y2) / 2 * k, top = cy - (lines.length - 1) * lh / 2;
+  ctx.textAlign = "center";
+  lines.forEach((l, i) => ctx.fillText(l, (x1 + x2) / 2 * k, top + i * lh));
+  ctx.textAlign = "left";
+}
+
 /* ---------- downloads ---------- */
 function saveBlob(name, blob) {
   const a = document.createElement("a");
@@ -195,7 +297,7 @@ const reportName = () => `LabReport_${P.id}_${curCourse().code.replace(/\s/g, ""
 
 function downloadImg() { cv.toBlob(b => saveBlob(fname("png"), b), "image/png"); }
 function downloadPdf() {
-  const { jsPDF } = window.jspdf, c = curCourse(), h = (c.pageH / c.pageW) * 210;
+  const { jsPDF } = window.jspdf, c = curCourse(), h = c.a4 ? 297 : (c.pageH / c.pageW) * 210;
   const pdf = new jsPDF({ unit: "mm", format: [210, h] });
   pdf.addImage(cv.toDataURL("image/jpeg", .95), "JPEG", 0, 0, 210, h);
   saveBlob(fname("pdf"), pdf.output("blob"));
@@ -324,12 +426,30 @@ async function reset() {
   } catch (e) { $("amsg").textContent = "Could not reset: " + e.message; }
 }
 
+/* ---------- page setup (one university per page) ---------- */
+function setupPage() {
+  const u = isManual() ? MAN() : null;
+  if (isManual() && !u) { document.body.innerHTML = "<main><p class='err'>University data not found.</p></main>"; return false; }
+  if (u) {
+    document.title = u.name + " Lab Cover Generator";
+    $("subtitle").textContent = u.subtitle;
+    $("sid").placeholder = u.idHint || "Student ID";
+  }
+  $("sid").maxLength = idLen();
+  fillCourses();
+  return true;
+}
+
 /* ---------- start-up ---------- */
 async function init() {
+  if (!setupPage()) return;
   $("course").onchange = onCourse;
   $("exp").onchange = draw;
   $("sid").addEventListener("input", onId);
   $("sid").addEventListener("blur", () => { if ($("sid").value) onId(); });
+
+  if (isManual()) return;                         /* other-university pages have no admin / Firebase */
+
   $("asave").onclick = save; $("areset").onclick = reset; $("alock").onclick = lockPanel;
 
   if (CFG.FIREBASE) {

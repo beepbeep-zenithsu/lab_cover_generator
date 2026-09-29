@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEWUNI Lab Cover Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+
+<div class="top">
+  <div>
+    <h1>Lab Cover Generator</h1>
+    <p class="s" id="subtitle"></p>
+  </div>
+</div>
+
+<div class="g">
+  <div>
+    <label for="sid">Student ID</label>
+    <input id="sid" inputmode="numeric" maxlength="7" placeholder="e.g. 2303001" autocomplete="off">
+    <div id="err" class="err" hidden></div>
+    <div id="info" class="card" hidden></div>
+
+    <div id="form" hidden>
+      <label for="course">Course</label>
+      <select id="course"></select>
+      <label for="exp">Experiment</label>
+      <select id="exp"></select>
+      <div id="extraFields"></div>
+      <div class="r" id="btns"></div>
+      <p class="note">Always check the preview before downloading.</p>
+    </div>
+    <p class="note">For any biodata correction or incorrect information, contact the administrator.</p>
+  </div>
+
+  <div>
+    <canvas id="cv" hidden></canvas>
+    <p id="ph" class="note">Preview appears here after you enter a valid Student ID.</p>
+  </div>
+</div>
+
+
+</main>
+
+<!-- Libraries (loaded from CDNs) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<!-- Your data + settings -->
+<script src="js/NEWUNI.js"></script>
+
+<!-- This page = CUET only -->
+<script>window.PAGE_UNI = "NEWUNI";</script>
+
+<!-- App logic -->
+<script src="js/app.js"></script>
+</body>
+</html>

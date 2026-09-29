@@ -31,3 +31,9 @@ textarea{font:12px/1.4 monospace;height:170px}
 [hidden]{display:none!important}
 .lock{border:1px dashed var(--bd);border-radius:8px;padding:14px;margin-top:10px;background:var(--card)}
 .timer{font-weight:600;color:var(--ac)}
+
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.seg{display:flex;flex:none;border:1px solid var(--ac);border-radius:8px;overflow:hidden}
+.seg button{width:auto;min-height:36px;padding:6px 14px;border:0;border-radius:0;background:#fff;color:var(--ac);font-size:14px}
+.seg button.on{background:var(--ac);color:#fff}
+#uniBox{margin-bottom:6px}

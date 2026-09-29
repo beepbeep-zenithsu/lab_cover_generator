@@ -6,16 +6,38 @@ Opening `index.html` by double-click will NOT work (browsers block loading the c
 
 ## Folder map
 ```
-index.html            page
+index.html            IUT page (IUT students only)
+cuet.html             CUET page (CUET students only)
 css/style.css         look & feel
 js/config.js          admin email, Firebase / EmailJS keys, department codes
 js/students.js        STUDENT LIST  (add lines here)
 js/courses.js         COURSES, experiments, teachers, text positions (add blocks here)
+js/cuet.js            CUET data (copy for another university)
+cuet.html             CUET page;  NEWUNI-template.html = starting point for a new university
 js/app.js             logic (rarely needs editing; ID rules are in parseId())
 assets/templates/     cover images (mom, material, thermo, fluid1..6)
 assets/fluid-rest/    report pages for each Fluid experiment (cover excluded)
 firestore.rules       security rules to paste into Firebase
 ```
+
+## One project, one page per university (nobody sees another university's interface)
+| Who | Link | Loads |
+|---|---|---|
+| IUT | `https://<user>.github.io/<repo>/` (index.html) | IUT students, courses, admin, Firebase. No CUET code. |
+| CUET | `https://<user>.github.io/<repo>/cuet.html` | CUET data only. No IUT students/courses/admin/Firebase/config. |
+
+* Share only the matching link with each group. There is no switch, list or button that leads to another university's page, and its data is never downloaded by your page.
+* Each university keeps its own settings in its own file (IUT: `js/config.js`, `js/students.js`, `js/courses.js`; CUET: `js/cuet.js`, including its correction email).
+
+### Adding a new university (e.g. BUET -> `buet`)
+1. Copy `js/cuet.js` to `js/buet.js`; rename `window.MANUAL_UNIS.cuet` to `window.MANUAL_UNIS.buet`; change name, ID length, students, section/group rules, cover image, positions, experiments.
+2. Put its cover image in `assets/templates/`.
+3. Copy `NEWUNI-template.html` to `buet.html` and replace `NEWUNI` with `buet` (3 places: title, script line, `PAGE_UNI`).
+4. Push. Share `https://<user>.github.io/<repo>/buet.html` with them.
+
+* CUET section / lab group come from the roll number (see `sectionFor` / `groupFor` in `js/cuet.js`): 1-30 A1, 31-60 A2, 61-90 B1, 91-120 B2, 121-150 C1, 151+ C2. Level, Term, Section, Group and dates are still editable on the page.
+* **IPE-only courses** (IPE 4304, IPE 4404, ME 4354) use the Mechanics of Materials cover: the course code and name are repainted from the course's `code` / `name` (see `ipeCourse()` and `MOM_OVERLAY` in `js/courses.js`). They appear only for IPE students (`depts: ["12"]`). To add another one, copy an `ipeCourse(...)` line.
+* If a department/course has no routine in `js/courses.js`, Date of Performance starts at today (editable) and Submitted To is left blank.
 
 ## Step 1: Put it online (GitHub Pages) so it works on your phone
 1. Create a GitHub repo and upload **everything inside this folder** (the files must sit at the repo root,

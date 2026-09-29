@@ -41,6 +41,22 @@ const fluidPos = (a, b, c, d) => ({
   nm: [FLUID_X.nm, a], sid: [FLUID_X.sid, b], pr: [FLUID_X.pr, c], gp: [FLUID_X.gp, d]
 });
 
+/* New IPE courses reuse the Mechanics of Materials cover (mom.jpg). The printed
+   course code and course name are covered with a patch and redrawn from the
+   course's own `code` and `name`. All numbers are pixels of the 1654 x 2339 image. */
+const MOM_OVERLAY = {
+  w: 1654,
+  pill:  { box: [640, 325, 1010, 405], color: "#860001", text: "#ffffff", cx: 825, cy: 363, size: 64 },
+  title: { box: [150, 425, 1500, 505], color: "#ffffff", text: "#40221f", cx: 825, cy: 460, size: 60, maxW: 1350 }
+};
+/* Same layout as MoM; only the day / teachers differ. */
+const ipeCourse = (id, code, name, day, teachers, exps) => ({
+  id, code, name, fields: "full", depts: ["12"],
+  tpl: "assets/templates/mom.jpg", pageW: 595.2, pageH: 841.92, pos: FULL_POS,
+  overlay: MOM_OVERLAY, exps,
+  routine: { "12": { "*": { day, t: teachers } } }
+});
+
 window.DEFAULT_COURSES = [
   {
     id: "mom", code: "ME 4404", name: "Mechanics of Materials Lab", fields: "full",
@@ -130,5 +146,28 @@ window.DEFAULT_COURSES = [
         B: { day: 5, t: "Dr. Muhammad Rizwanur Rahman (Sir) & Mr. Sefat Mahmud Siddique (Sir)" }
       }
     }
-  }
+  },
+
+  /* ---------- IPE-only courses (shown only to IPE students) ---------- */
+  ipeCourse("ipe4304", "IPE 4304", "Manufacturing Processes I Lab", 4,   /* Thursday */
+    "Ms. Fahmida Tabassum Bristy (Mam) & Mr. Imrul Kayes (Sir)",
+    ["Casting Process Practice", "Grinding Process Practice", "Gas Welding Practice", "Fabrication Practice"]),
+
+  ipeCourse("ipe4404", "IPE 4404", "Manufacturing Processes II Lab", 5,   /* Friday */
+    "Ms. Sharmin Akter Urmee (Mam) & Mr. Imrul Kayes (Sir)",
+    ["Study of Indexing Method and Manufacturing of a Spur Gear on a Milling Machine",
+     "Preparation of a Tensile Test Specimen",
+     "Study of Injection Moulding Machine",
+     "Study of Electrical Discharge Machine",
+     "Study of CNC Drilling Machine"]),
+
+  ipeCourse("me4354", "ME 4354", "Thermodynamics and Heat Transfer Lab", 2,   /* Tuesday */
+    "Mr. Imrul Kayes (Sir)",
+    ["Calibration of Thermocouples",
+     "Determination of calorific value of fuel using bomb calorimeter",
+     "Determination of Thermal Conductivity of a Metal Bar using Linear Heat Conduction",
+     "Study of construction and working principles of boiler",
+     "Study of a petrol engine",
+     "Study of a Diesel engine",
+     "Study the performance of parallel flow in plate heat exchanger"])
 ];
