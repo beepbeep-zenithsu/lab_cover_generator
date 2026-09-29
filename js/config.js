@@ -33,10 +33,12 @@ window.APP_CONFIG = {
      FIREBASE CONFIGURATION
      --------------------------------------------------------------- */
 
-  FIREBASE: {
-    apiKey: "AIzaSyCXmB5_e1vL1KjTV6S43gD7bWSfNycMvM",
+    FIREBASE: {
+    apiKey: "AIzaSyCXmB5_e1Vl1KjTV6S43gD7bWSfNycyMvM",
     authDomain: "iut-lab-cover.firebaseapp.com",
     projectId: "iut-lab-cover",
+    storageBucket: "iut-lab-cover.firebasestorage.app",
+    messagingSenderId: "694199782173",
     appId: "1:694199782173:web:5c4f015ed0df08d5286ff4"
   },
 

@@ -251,14 +251,24 @@ function lockPanel() {
 
 /* --- Mode 1: Firebase email link --- */
 async function fbSend() {
-  $("otpArea").hidden = false; $("otpEntry").hidden = true; $("linkNote").hidden = false;
-  $("otpMsg").textContent = "";
+  $("otpArea").hidden = true;
+  $("otpMsg").textContent = "Sending...";
   const url = location.origin + location.pathname + "?adm=" + Date.now();
   try {
     await auth.sendSignInLinkToEmail(CFG.ADMIN_EMAIL, { url, handleCodeInApp: true });
+    $("otpArea").hidden = false;
+    $("otpEntry").hidden = true;
+    $("linkNote").hidden = false;
     $("otpMsg").textContent = "Sign-in link sent to " + CFG.ADMIN_EMAIL + ".";
-    startTimer(Date.now() + CFG.OTP_SECONDS * 1000, () => { $("otpMsg").textContent = "Link expired. Click the button to send a new one."; });
-  } catch (e) { $("otpMsg").textContent = "Could not send the link: " + e.message; }
+    startTimer(Date.now() + CFG.OTP_SECONDS * 1000, () => {
+      $("linkNote").hidden = true;
+      $("otpMsg").textContent = "Link expired. Click the button to send a new one.";
+    });
+  } catch (e) {
+    clearInterval(timer);
+    $("otpArea").hidden = true;
+    $("otpMsg").textContent = "Could not send the link: " + e.message;
+  }
 }
 /* --- Mode 2: EmailJS one-time code --- */
 let otp = null;
