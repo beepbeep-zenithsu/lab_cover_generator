@@ -1,0 +1,33 @@
+:root{--bg:#fff;--fg:#1a1a1a;--mut:#666;--bd:#d9d9d9;--ac:#7a0f18;--err:#b00020;--card:#fafafa;--ok:#1b6e3a;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#fff}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Ubuntu,system-ui,Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:980px;margin:0 auto;padding:18px 14px 48px}
+h1{font-size:19px;margin:0 0 2px}
+p.s{color:var(--mut);margin:0 0 16px;font-size:13px}
+.g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media(max-width:760px){.g{grid-template-columns:minmax(0,1fr)}}
+label{display:block;font-size:12.5px;color:var(--mut);margin:12px 0 4px}
+input,select,textarea,button{font:inherit;font-size:16px;width:100%;padding:11px 10px;border:1px solid var(--bd);
+ border-radius:8px;background:#fff;color:var(--fg);min-height:44px}
+button{cursor:pointer;background:var(--ac);color:#fff;border-color:var(--ac);width:auto;font-weight:500}
+button.o{background:#fff;color:var(--ac)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.r{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.r button{flex:1 1 auto;min-width:130px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:13.5px}
+.card div{padding:2px 0}.card b{display:inline-block;min-width:110px;color:var(--mut);font-weight:400}
+.err{color:var(--err);margin-top:10px;font-size:14px}
+.ok{color:var(--ok)}
+.note{color:var(--mut);font-size:12px;margin-top:8px;line-height:1.5}
+canvas{width:100%;height:auto;border:1px solid var(--bd);display:block;background:#fff;border-radius:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+details{margin-top:14px}
+details#adm{margin-top:30px;border-top:1px solid var(--bd);padding-top:12px}
+summary{cursor:pointer;color:var(--mut);font-size:13px;padding:6px 0}
+textarea{font:12px/1.4 monospace;height:170px}
+[hidden]{display:none!important}
+.lock{border:1px dashed var(--bd);border-radius:8px;padding:14px;margin-top:10px;background:var(--card)}
+.timer{font-weight:600;color:var(--ac)}

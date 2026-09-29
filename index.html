@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IUT Lab Cover Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+
+<h1>Lab Cover Generator</h1>
+<p class="s">Islamic University of Technology &middot; Dept. of Mechanical &amp; Production Engineering</p>
+
+<div class="g">
+  <div>
+    <label for="sid">Student ID</label>
+    <input id="sid" inputmode="numeric" maxlength="9" placeholder="e.g. 230011201" autocomplete="off">
+    <div id="err" class="err" hidden></div>
+    <div id="info" class="card" hidden></div>
+
+    <div id="form" hidden>
+      <label for="course">Course</label>
+      <select id="course"></select>
+      <label for="exp">Experiment</label>
+      <select id="exp"></select>
+      <div id="extraFields"></div>
+      <div class="r" id="btns"></div>
+      <p class="note">Always check the preview before downloading.</p>
+    </div>
+    <p class="note">For any biodata correction or incorrect information, contact the administrator.</p>
+  </div>
+
+  <div>
+    <canvas id="cv" hidden></canvas>
+    <p id="ph" class="note">Preview appears here after you enter a valid Student ID.</p>
+  </div>
+</div>
+
+<details id="adm">
+  <summary>Admin</summary>
+
+  <div id="lockBox" class="lock">
+    <p class="note" style="margin-top:0" id="lockText"></p>
+    <button id="sendOtp">Send code to admin email</button>
+    <div id="otpArea" hidden style="margin-top:10px">
+      <div id="otpEntry">
+        <label for="otpIn">Enter the 6-digit code (<span class="timer timeLeft">2:00</span> left)</label>
+        <input id="otpIn" inputmode="numeric" maxlength="6" placeholder="000000">
+        <div class="r"><button id="checkOtp">Unlock</button><button id="resendOtp" class="o" type="button">Resend</button></div>
+      </div>
+      <p id="linkNote" class="note" hidden>Link sent. Open the email and tap the link within
+        <span class="timer timeLeft">2:00</span>. Then come back here.</p>
+    </div>
+    <div id="otpMsg" class="note"></div>
+  </div>
+
+  <div id="adminPanel" hidden>
+    <p class="note" id="modeNote"></p>
+    <label for="astu">Student list &mdash; one per line: <code>ID Name</code></label>
+    <textarea id="astu"></textarea>
+    <label for="acfg">Course / experiment / routine configuration (JSON)</label>
+    <textarea id="acfg"></textarea>
+    <div class="r">
+      <button id="asave">Save</button>
+      <button id="areset" class="o">Reset to file defaults</button>
+      <button id="alock" class="o">Lock admin</button>
+    </div>
+    <div id="amsg" class="note"></div>
+  </div>
+</details>
+
+</main>
+
+<!-- Libraries (loaded from CDNs) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<!-- Your data + settings -->
+<script src="js/config.js"></script>
+<script src="js/students.js"></script>
+<script src="js/courses.js"></script>
+
+<!-- App logic -->
+<script src="js/app.js"></script>
+</body>
+</html>
